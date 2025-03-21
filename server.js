@@ -1,36 +1,33 @@
-// cors
-const cors = require("cors");
-app.use(cors());
-
 // server.js
 const express = require("express");
 const { MongoClient } = require("mongodb");
-require("dotenv").config(); // Charge les variables d'environnement depuis le fichier .env
+const cors = require("cors"); // Require the cors package
+require("dotenv").config(); // Load environment variables from .env
 
 const app = express();
 const port = process.env.PORT || 3000;
 const uri = process.env.MONGO_URI;
 
-// console.log("uri:", uri);
+app.use(cors()); // Enable CORS for all routes
 
-// Route pour renvoyer le leaderboard (avec apparition la plus récente)
+// Route to return the leaderboard (with the most recent appearance)
 app.get("/leaderboard", async (req, res) => {
     const client = new MongoClient(uri);
     try {
         await client.connect();
-        const db = client.db("bot-swbox-db"); // Nom de la base
-        const collection = db.collection("upload-json"); // Nom de la collection
+        const db = client.db("bot-swbox-db"); // Database name
+        const collection = db.collection("upload-json"); // Collection name
 
-        // Récupérer les documents
+        // Retrieve documents
         const data = await collection.find({}).toArray();
 
-        // Fonction pour parser une date au format DD-MM-YYYY en objet Date
+        // Function to parse a date in DD-MM-YYYY format to a Date object
         const parseDate = (dateStr) => {
             const [day, month, year] = dateStr.split("-");
             return new Date(`${year}-${month}-${day}`);
         };
 
-        // Pour chaque document, récupérer l'apparition ayant la date la plus récente
+        // For each document, retrieve the appearance with the most recent date
         const leaderboard = data.map(doc => {
             const mostRecent = doc.apparitions.reduce((latest, current) =>
                 parseDate(current.date) > parseDate(latest.date) ? current : latest
@@ -47,15 +44,15 @@ app.get("/leaderboard", async (req, res) => {
 
         res.json({ leaderboard });
     } catch (error) {
-        console.error("Erreur lors de la récupération des données :", error);
-        res.status(500).json({ error: "Erreur lors de la connexion à la base de données" });
+        console.error("Error retrieving data:", error);
+        res.status(500).json({ error: "Error connecting to the database" });
     } finally {
         await client.close();
     }
 });
 
-// Route pour renvoyer tous les éléments d'un document joueur (/playerDetail)
-// avec tri des apparitions du plus vieux au plus récent.
+// Route to return all elements of a player document (/playerDetail)
+// with the appearances sorted from oldest to most recent.
 app.get("/playerDetail/:id", async (req, res) => {
     const playerId = req.params.id;
     const client = new MongoClient(uri);
@@ -64,30 +61,28 @@ app.get("/playerDetail/:id", async (req, res) => {
         const db = client.db("bot-swbox-db");
         const collection = db.collection("upload-json");
 
-        // Recherche du document correspondant au joueur (champ "id")
+        // Find the document corresponding to the player (field "id")
         const player = await collection.findOne({ id: playerId });
         if (!player) {
-            res.status(404).json({ error: "Joueur non trouvé" });
+            res.status(404).json({ error: "Player not found" });
         } else {
-            // Fonction pour parser une date au format DD-MM-YYYY en objet Date
+            // Function to parse a date in DD-MM-YYYY format to a Date object
             const parseDate = (dateStr) => {
                 const [day, month, year] = dateStr.split("-");
                 return new Date(`${year}-${month}-${day}`);
             };
-            // Tri des apparitions par date, du plus vieux au plus récent
-            player.apparitions.sort((a, b) => {
-                return parseDate(a.date) - parseDate(b.date);
-            });
+            // Sort appearances by date, from oldest to most recent
+            player.apparitions.sort((a, b) => parseDate(a.date) - parseDate(b.date));
             res.json({ player });
         }
     } catch (error) {
-        console.error("Erreur lors de la récupération du document :", error);
-        res.status(500).json({ error: "Erreur lors de la récupération du document" });
+        console.error("Error retrieving the document:", error);
+        res.status(500).json({ error: "Error retrieving the document" });
     } finally {
         await client.close();
     }
 });
 
 app.listen(port, () => {
-    console.log(`Serveur Express démarré sur le port ${port}`);
+    console.log(`Express server started on port ${port}`);
 });
