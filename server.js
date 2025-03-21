@@ -1,3 +1,7 @@
+// cors
+const cors = require("cors");
+app.use(cors());
+
 // server.js
 const express = require("express");
 const { MongoClient } = require("mongodb");
