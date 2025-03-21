@@ -39,6 +39,7 @@ app.get("/leaderboard", async (req, res) => {
                 score_eff: mostRecent.score_eff,
                 score_spd: mostRecent.score_spd,
                 total: mostRecent.score_eff + mostRecent.score_spd,
+                apparitionsCount: doc.apparitions.length
             };
         });
 
