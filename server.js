@@ -40,7 +40,7 @@ app.get("/leaderboard", async (req, res) => {
                 score_siege_eff: mostRecent.siege_eff,
                 score_rta_spd: mostRecent.rta_spd,
                 score_siege_spd: mostRecent.siege_spd,
-                anonyme: mostRecent.anonyme,
+                anonyme: doc.apparitions.some(app => app.anonyme === 1) ? 1 : 0,
                 apparitionsCount: doc.apparitions.length
             };
         });
