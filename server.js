@@ -36,9 +36,10 @@ app.get("/leaderboard", async (req, res) => {
                 id: doc.id,
                 date: mostRecent.date,
                 pseudo: mostRecent.pseudo,
-                score_eff: mostRecent.score_eff,
-                score_spd: mostRecent.score_spd,
-                total: mostRecent.score_eff + mostRecent.score_spd,
+                score_rta_eff: mostRecent.rta_eff,
+                score_siege_eff: mostRecent.siege_eff,
+                score_rta_spd: mostRecent.rta_spd,
+                score_siege_spd: mostRecent.siege_spd,
                 apparitionsCount: doc.apparitions.length
             };
         });
